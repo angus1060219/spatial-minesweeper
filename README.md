@@ -1,2 +1,1 @@
-# spatial-minesweeper
- Minesweeper meets spatial statistics: tunable clustering, live Moran’s I. 用踩地雷體驗空間自相關。
+#Minesweeper where mines follow tunable spatial autocorrelation. Slide σ from random to clustered and watch Moran’s I respond. Hint numbers = spatial lag.
