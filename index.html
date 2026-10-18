@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spatial Minesweeper · 空間自相關踩地雷</title>
+  <meta name="description" content="Minesweeper where mines follow a tunable spatial autocorrelation (Moran's I). 用踩地雷體驗空間自相關。" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Spatial Minesweeper <span>空間自相關踩地雷</span></h1>
+    <p class="lede">
+      Every number is a <b>spatial lag</b>: how many of the 8 queen neighbours are mines.
+      Slide <b>σ</b> to move mines from random to clustered, and watch <b>Moran's I</b> change.<br />
+      每個數字都是 <b>spatial lag</b>（8 個 queen 鄰居中有幾顆雷）。調整 <b>σ</b> 讓雷從隨機變成聚集，看 <b>Moran's I</b> 怎麼變。
+    </p>
+  </header>
+
+  <main>
+    <section class="controls" aria-label="Settings 設定">
+      <label>Board 盤面
+        <select id="preset">
+          <option value="9x9">Beginner 9×9</option>
+          <option value="16x16" selected>Intermediate 16×16</option>
+          <option value="16x30">Expert 16×30</option>
+        </select>
+      </label>
+
+      <label>Clustering σ 聚集程度 <output id="sigmaOut">0.0</output>
+        <input id="sigma" type="range" min="0" max="4" step="0.5" value="0" />
+      </label>
+
+      <label>Mine density 雷密度 <output id="densOut">16%</output>
+        <input id="density" type="range" min="0.08" max="0.25" step="0.01" value="0.16" />
+      </label>
+
+      <label>Seed 種子
+        <span class="row">
+          <input id="seed" type="number" min="0" step="1" />
+          <button id="reseed" type="button" title="Random seed 隨機種子">🎲</button>
+        </span>
+      </label>
+
+      <div class="buttons">
+        <button id="newGame" type="button" class="primary">New game 新局</button>
+        <button id="flagMode" type="button" aria-pressed="false">🚩 Flag mode 插旗模式</button>
+        <button id="showField" type="button" aria-pressed="false">Show latent field 顯示潛在場</button>
+        <button id="exportCsv" type="button" disabled>Download board CSV 下載盤面</button>
+      </div>
+    </section>
+
+    <section class="play">
+      <div class="status">
+        <span>💣 <b id="minesLeft">–</b></span>
+        <span>⏱ <b id="timer">0</b>s</span>
+        <span id="message">Click any cell to start · 點任一格開始</span>
+      </div>
+      <div id="board" class="board" role="grid" aria-label="Minefield 雷區"></div>
+    </section>
+
+    <aside class="stats" aria-label="Spatial statistics 空間統計">
+      <h2>Spatial statistics 空間統計</h2>
+      <dl>
+        <dt>Moran's I (observed 觀測值)</dt><dd id="moranI">–</dd>
+        <dt>E[I] under randomness 隨機期望值</dt><dd id="moranE">–</dd>
+        <dt>Pseudo p-value (199 perms)</dt><dd id="moranP">–</dd>
+        <dt>Interpretation 解讀</dt><dd id="moranTxt">–</dd>
+      </dl>
+      <details>
+        <summary>How it works 原理</summary>
+        <ol>
+          <li>Generate Gaussian white noise on the grid. 在網格上產生高斯白雜訊。</li>
+          <li>Smooth it with a Gaussian filter of width σ. σ = 0 means no smoothing. 用寬度 σ 的高斯濾波平滑；σ = 0 代表不平滑。</li>
+          <li>The top-k cells become mines (your first click and its neighbours are kept safe). 數值最高的前 k 格變成雷（第一下點擊處與鄰居保證安全）。</li>
+          <li>Moran's I is computed with binary queen-contiguity weights, the same neighbourhood the hint numbers use. Moran's I 用二元 queen 權重計算，跟提示數字用的鄰居定義一樣。</li>
+        </ol>
+        <p>Tobler's First Law: near things are more related than distant things. When mines cluster, one mine tells you a lot about its neighbours.<br />
+        Tobler 地理學第一定律：越近的東西越相關。雷聚集時，看到一顆雷就知道附近很危險。</p>
+      </details>
+    </aside>
+  </main>
+
+  <footer>
+    Made by YUAN · <a href="https://github.com/">GitHub</a> · MIT License
+  </footer>
+
+  <script src="js/minefield.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
